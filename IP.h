@@ -40,6 +40,12 @@ typedef struct {	/* image data structure	 */
 	uchar *image;	/* pointer to image data */
 } imageS, *imageP;
 
+typedef struct {
+	int len; /* length of complex number list */
+	float *real; /* pointer to real number list */
+	float *imag; /* pointer to imaginary number list */
+} complexS, *complexP;
+
 extern imageP	IP_readImage	(char *);
 extern void		IP_saveImage	(imageP, char*);
 extern imageP	IP_allocImage	(int, int, int);
