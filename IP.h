@@ -18,6 +18,7 @@
 #define MXGRAY			256
 #define BLACK			0
 #define	WHITE			255
+#define PI 				3.14159265
 #define NEWIMAGE		((imageP) malloc(sizeof(imageS)))
 
 /* useful macros */

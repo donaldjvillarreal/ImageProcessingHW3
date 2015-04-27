@@ -10,7 +10,7 @@
 using namespace std;
 
 // function prototype
-void dft(complexP, int, complexP);
+void dft(char*, int, char*);
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // main:
@@ -21,7 +21,6 @@ int
 main(int argc, char** argv)
 {
 	int			dir; 
-	complexP	I1, I2;
 
 	// error checking: proper usage
 	if(argc != 4) {
@@ -30,8 +29,7 @@ main(int argc, char** argv)
 	}
 
 	// read input image (I1) and reserve space for output (I2)
-	I1 = IP_readImage(argv[1]);
-	I2 = NEWIMAGE;
+	char *in = argv[1];
 
 	// read lower and upper thresholds
 	dir  = atoi(argv[2]);
@@ -41,13 +39,9 @@ main(int argc, char** argv)
 		exit(1);
 	}
 
+	char *out = argv[3];
 	// blur image and save result in file
-	dft(I1, dir, I2);
-	IP_saveImage(I2, argv[4]);
-
-	// free up image structures/memory
-	IP_freeImage(I1);
-	IP_freeImage(I2);
+	dft(in, dir, out);
 
 	return 1;
 }
@@ -60,10 +54,59 @@ main(int argc, char** argv)
 // 
 
 void
-dft(imageP I1, int dir, imageP I2)
+dft(char *in, int dir, char *out)
 {
+	int width, N, i, u, x;
+	double real, imag;
+	//Read input from kernel file
+    ifstream file(in);
+    if(file.is_open()) {
+    	file >> width;		file >> N;
+    }
 
+	double Fr[N], Fi[N], f[N];
+	if(dir==0) {
+	    if(file.is_open())
+			for(i=0; i < N; i++) file >> f[i];
+	}
 
+	else if(dir==1) {
+		if(file.is_open()) {
+			for(i=0; i < N; i++) {
+				file >> Fr[i];
+				file >> Fi[i];
+			}
+		}
+	}
 
+	ofstream myfile;
+	myfile.open(out);
+	if(dir==0) {
+		for(u=0; u<N; u++) {
+			real = imag = 0;
+			for(x=0; x<N; x++) {
+				real += (f[x]*cos(-2*PI*u*x/N));
+				imag += (f[x]*sin(-2*PI*u*x/N));
+			}
+			Fr[u] = real / N;
+			Fi[u] = imag / N;
+			myfile << Fr[u] << " " << Fi[u] << "\n";
+		}
+	}
 
+	else if(dir==1) {
+		double c, s, fr[N];
+		for(x=0; x<N; x++) {
+			real = imag = 0;
+			for(u=0; u<N; u++) {
+				c = cos(2*PI*u*x/N);
+				s = sin(2*PI*u*x/N);
+				real += (Fr[u]*c-Fi[u]*s);
+				imag += (Fr[u]*s+Fi[u]*c);
+			}
+			fr[x] = real;
+			myfile << fr[x] << "\n";
+		}
+	}
+	myfile.close();
 }
